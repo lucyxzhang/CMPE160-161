@@ -1,0 +1,125 @@
+---------------------------------------------
+-- Company		: RIT
+-- Author		: Lucy Zhang
+-- Created		: 11/7/2022
+--
+-- Project name	: lab11
+-- File		: dual_4_to_1_mux.vhd
+--
+-- Entity		: dual_4_to_1_mux
+-- Architecture	: df (data flow)
+-- Architectrue : behv (behavioral)
+--
+-- Revision
+-- Rev 0.01		: 11/7/2022
+--
+-- Tool version	: VHDL'93
+-- Description	: The following is the entity and
+--			  behavioral description of a 
+--			  dual 4:1 mux
+-- Notes		:
+
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.std_logic_unsigned.all;
+
+entity dual_four_to_one_mux is
+	port(G1, G2 		: in std_logic; -- enable (active low)
+		 A, B			: in std_logic; -- select
+		 C1, C2			: in std_logic_vector(3 downto 0); -- data in (4 bits)
+		 Y1, Y2			: out std_logic); -- data out
+end entity dual_four_to_one_mux;
+
+
+-- architecture df (data flow)
+architecture df of dual_four_to_one_mux is 
+-- declare internal control signals for each of the multiplexers
+signal sControl1, sControl2 : std_logic_vector(2 downto 0);
+begin
+	-- first multiplexer
+	sControl1 <= (G1 & B & A);
+	with sControl1 select -- looks at enable, and selects
+		Y1 <= C1(0) when "000",  -- selects C1(0)
+		      C1(1) when "001",  -- selects C1(1)
+		      C1(2) when "010",  -- selects C1(2)
+		      C1(3) when "011",  -- selects C1(3)
+		      '0'   when others; -- output is 0 when G1 (enable) is high
+	
+	-- second multiplexer
+	sControl2 <= (G2 & B & A);
+	with sControl2 select -- looks at enable, and selects
+		Y2 <= C2(0) when "000",  -- selects C2(0)
+		      C2(1) when "001",  -- selects C2(1)
+		      C2(2) when "010",  -- selects C2(2) 
+		      C2(3) when "011",  -- selects C2(3)
+		      '0'   when others; -- output is 0 when G2 (enable) is high
+
+end architecture df;
+
+
+-- architecture behv (behavior)
+architecture behv of dual_four_to_one_mux is
+  
+  begin
+	process (G1, B, A, C1) is
+	variable sControl1 : std_logic_vector(2 downto 0);
+	begin
+	  sControl1 <= G1 & B & A;
+		case sControl1 is
+			-- includes worst case propagation delay
+			when "000" => Y1 <= C1(0) after 22 ns; -- selects C1(0)
+			when "001" => Y1 <= C1(1) after 22 ns; -- selects C1(1)
+			when "010" => Y1 <= C1(2) after 22 ns; -- selects C1(2)
+			when "011" => Y1 <= C1(3) after 22 ns; -- selects C1(3)
+			when others => Y1 <= '0'  after 22 ns; --output is 0 when G1 (enable) is high
+		end case;
+	end process;
+
+	process (G2, B, A, C2) is 
+	variable sControl2 : std_logic_vector(2 downto 0);
+	begin
+	  sControl2 <= G2 & B & A;
+		case sControl2 is
+			-- includes worst case propagation delay
+			when "000" => Y2 <= C2(0) after 22 ns; -- selects C2(0)
+			when "001" => Y2 <= C2(1) after 22 ns; -- selects C2(1)
+			when "010" => Y2 <= C2(2) after 22 ns; -- selects C2(2)
+			when "011" => Y2 <= C2(3) after 22 ns; -- selects C2(3)
+			when others => Y2 <= '0'  after 22 ns; --output is 0 when G2 (enable) is high 
+		end case;
+	end process;
+
+end architecture behv;
+
+
+architecture struct of dual_four_to_one_mux is
+	component four_to_one_mux is
+		port(
+			A, B: in std_logic;  -- selects
+			G		: in std_logic;  -- enable
+			C		: in std_logic_vector; -- data in
+			Y		: out std_logic  -- output
+		);
+	end component four_to_one_mux;
+
+begin
+	-- first mux in dual 4:1 mux
+	firstmux : four_to_one_mux port map (
+		-- assigns signals to ports
+		A => A,
+		B => B,
+		G => G1,
+		C => C1,
+		Y => Y1
+	);
+
+	-- second mux in dual 4:1 mux
+	secondmux : four_to_one_mux port map (
+		-- assigns signals to ports
+		A => A,
+		B => B,
+		G => G2,
+		C => C2,
+		Y => Y2
+	);
+end architecture struct;

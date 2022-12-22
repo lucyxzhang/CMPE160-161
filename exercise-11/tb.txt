@@ -1,0 +1,142 @@
+---------------------------------------------
+-- Company		: RIT
+-- Author		: Lucy Zhang
+-- Created		: 11/7/2022
+--
+-- Project name	: lab11
+-- File		: tb.vhd
+--
+-- Entity		: tb
+-- Architecture	: struct, behavioral, df
+--
+-- Revision
+-- Rev 0.01		: 11/7/2022
+--
+-- Tool version	: VHDL'93
+-- Description	: tb for lab11
+
+library ieee;
+use ieee.std_logic_1164.all;
+
+entity tb is
+end tb;
+
+architecture behavior of tb is
+  component dual_four_to_one_mux
+    port (
+      G1, G2    : in std_logic; --enable
+      A, B      : in std_logic; --selects
+      C1, C2    : in std_logic_vector(3 downto 0); --data in
+      Y1, Y2    : out std_logic --data out
+    );
+end component dual_four_to_one_mux;
+
+-- declares signals
+signal sG1 : std_logic;
+signal sA, sB   : std_logic;
+signal sC1 : std_logic_vector(3 downto 0);
+signal sY1_1, sY2_1 : std_logic;
+signal sY1_2, sY2_2 : std_logic;      
+signal sY1_3, sY2_3 : std_logic;
+
+-- uses all three models
+for UUT1: dual_four_to_one_mux use entity work.dual_four_to_one_mux(df);
+for UUT2: dual_four_to_one_mux use entity work.dual_four_to_one_mux(behv);
+for UUT3: dual_four_to_one_mux use entity work.dual_four_to_one_mux(struct);
+
+-- creates test record
+type test_record is record
+  G, B, A       : std_logic;
+  C1            : std_logic_vector(3 downto 0);
+  Y1            : std_logic;
+end record;
+
+type testRecord is array(natural range <>) of test_record;
+
+-- test arrays for the 3 tests
+
+constant ctest1 : testRecord := (( G => '0', B => '0', A => '0', C1 => "1110", Y1 => '0'),
+                                ( G => '0', B => '0', A => '0', C1 => "0001", Y1 => '1'),
+                                ( G => '0', B => '0', A => '1', C1 => "1101", Y1 => '0'),
+                                ( G => '0', B => '0', A => '1', C1 => "0010", Y1 => '1'),
+                                ( G => '0', B => '1', A => '0', C1 => "1011", Y1 => '0'),
+                                ( G => '0', B => '1', A => '0', C1 => "0100", Y1 => '1'),
+                                ( G => '0', B => '1', A => '1', C1 => "0111", Y1 => '0'),
+                                ( G => '0', B => '1', A => '1', C1 => "1000", Y1 => '1'));
+                                
+constant ctest2 : testRecord := (( G => '0', B => '0', A => '0', C1 => "1010", Y1 => '0'),
+                                ( G => '0', B => '0', A => '1', C1 => "1010", Y1 => '1'),
+                                ( G => '0', B => '1', A => '0', C1 => "1010", Y1 => '0'),
+                                ( G => '0', B => '1', A => '1', C1 => "1010", Y1 => '1'),
+                                ( G => '0', B => '0', A => '0', C1 => "0101", Y1 => '1'),
+                                ( G => '0', B => '0', A => '1', C1 => "0101", Y1 => '0'),
+                                ( G => '0', B => '1', A => '0', C1 => "0101", Y1 => '1'),
+                                ( G => '0', B => '1', A => '1', C1 => "0101", Y1 => '0'));
+                                
+constant ctest3 : testRecord := (( G => '1', B => '0', A => '0', C1 => "1010", Y1 => '0'),
+                                ( G => '1', B => '0', A => '1', C1 => "1010", Y1 => '0'),
+                                ( G => '1', B => '1', A => '0', C1 => "1010", Y1 => '0'),
+                                ( G => '1', B => '1', A => '1', C1 => "1010", Y1 => '0'),
+                                ( G => '1', B => '0', A => '0', C1 => "0101", Y1 => '0'),
+                                ( G => '1', B => '0', A => '1', C1 => "0101", Y1 => '0'),
+                                ( G => '1', B => '1', A => '0', C1 => "0101", Y1 => '0'),
+                                ( G => '1', B => '1', A => '1', C1 => "0101", Y1 => '0'));
+--                                
+
+begin
+  -- assigns ports to signals
+  UUT1: dual_four_to_one_mux port map (G1 => sG1, G2 => sG1, A => sA, B => sB, C1 => sC1, C2 => sC1, Y1 => sY1_1, Y2 => sY2_1);
+  UUT2: dual_four_to_one_mux port map (G1 => sG1, G2 => sG1, A => sA, B => sB, C1 => sC1, C2 => sC1, Y1 => sY1_2, Y2 => sY2_2);
+  UUT3: dual_four_to_one_mux port map (G1 => sG1, G2 => sG1, A => sA, B => sB, C1 => sC1, C2 => sC1, Y1 => sY1_3, Y2 => sY2_3);
+
+tb: process
+begin
+  --for ctest 1; data flow
+  --for i in ctest1'range loop 
+--    sG1  <= ctest1(i).G;
+--    sB  <= ctest1(i).B;
+--    sA  <= ctest1(i).A;
+--    sC1 <= ctest1(i).C1;
+--    wait for 100 ns;
+--  end loop;
+--  
+  --for behavioral
+--  for i in ctest1'range loop
+--    sG1  <= ctest2(i).G;
+--    sB  <= ctest2(i).B;
+--    sA  <= ctest2(i).A;
+--    sC1 <= ctest2(i).C1;
+--    wait for 100 ns;
+--  end loop;
+--  
+  --for structural
+  for i in ctest1'range loop
+    sG1  <= ctest3(i).G;
+    sB  <= ctest3(i).B;
+    sA  <= ctest3(i).A;
+    sC1 <= ctest3(i).C1;
+    wait for 100 ns;
+  end loop;
+  end process;
+end architecture;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

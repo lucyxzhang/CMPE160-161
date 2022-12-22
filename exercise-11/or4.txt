@@ -1,0 +1,33 @@
+---------------------------------------------
+-- Company		: RIT
+-- Author		: Lucy Zhang
+-- Created		: 11/7/2022
+--
+-- Project name	: lab11
+-- File		: or4.vhd
+--
+-- Entity		: or4
+-- Architecture	: df
+--
+-- Revision
+-- Rev 0.01		: 11/7/2022
+--
+-- Tool version	: VHDL'93
+-- Description	: or4 gate
+
+library ieee;
+use ieee.std_logic_1164.all;
+
+-- 4-input OR gate with 7 ns propagation delay
+entity or4 is
+	port (
+		A, B, C, D : in std_logic; --input
+		Y          : out std_logic --output
+		);
+end entity or4;
+
+architecture df of or4 is
+	-- dataflow
+begin
+	Y <= A OR B OR C OR D after 7 ns;
+end architecture df;
