@@ -1,0 +1,21 @@
+-- Project name	: lab12
+-- File		: inverter.vhd
+-- Author	: Lucy Zhang
+-- Entity	: inverter
+-- Architecture	: df
+-- Description: inverter
+--------------------------------------------------------------
+library ieee;
+use ieee.std_logic_1164.all;
+
+-- entity
+entity inverter is 
+  port (A     : in std_logic;
+        Y     : out std_logic);
+end entity;
+
+-- 2 ns delay
+architecture df of inverter is
+  begin
+    Y <= NOT A after 2 ns;
+end architecture;

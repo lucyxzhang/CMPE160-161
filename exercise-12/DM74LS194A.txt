@@ -1,0 +1,91 @@
+-- Project name	: lab12
+-- File		: DM74LS194A.vhd
+-- Author	: Lucy Zhang
+-- Entity	: DM74LS194A
+-- Architecture	: behav
+-- Description: 4-bit shift register 
+--------------------------------------------------------------
+library ieee;
+use ieee.std_logic_1164.all;
+
+-- entity
+entity DM74LS194A is
+  port (a, b, c, d : in std_logic; -- 4 bit input data
+        clk, clear : in std_logic; -- clock and clear
+        s0, s1     : in std_logic; -- mode for hold, reset, shift left, shift right
+        sL, sR     : in std_logic; -- serial in for shift left and shift right
+        qa, qb, qc, qd : out std_logic -- 4 bit output
+        );
+end entity;
+         
+-- architecture
+architecture behav of DM74LS194A is
+-- internal signals
+  signal int_reg : std_logic_vector(3 downto 0) := (others => '0'); 
+  signal sMode   : std_logic_vector(1 downto 0) := (others => '0');
+begin
+-- assigns signals to ports
+  qa <= int_reg(3); -- didn't add delay here so reset wouldn't have delay
+  qb <= int_reg(2);
+  qc <= int_reg(1);
+  qd <= int_reg(0);
+  sMode <= s1 & s0;
+  -- process for operations depending on mode
+  process (clear, clk) is
+  begin
+    if clear = '0' then
+      int_reg <= (others => '0');
+    elsif (rising_edge(clk)) then
+      case sMode is
+        when "00" => int_reg <= int_reg after 22 ns;
+        when "01" => int_reg <= sR & int_reg(3 downto 1) after 22 ns;
+        when "10" => int_reg <= int_reg(2 downto 0) & sL after 22 ns;
+        when others => int_reg <= a & b & c & d after 22 ns;
+      end case;
+    end if;
+  end process;
+  end architecture;
+
+  -- architecture behv of DM74LS194A is
+--   signal sqa, sqb, sqc, sqd: std_logic;
+--   signal sMode : std_logic_vector(1 downto 0);
+-- begin
+-- process (clear, clk) is
+-- begin
+--   sMode <= s1 & s0;
+--   if(clear = '0') then
+--     sqa <= '0' after 22 ns;
+--     sqb <= '0' after 22 ns;
+--     sqc <= '0' after 22 ns;
+--     sqd <= '0' after 22 ns;
+--   elsif(rising_edge(clk)) then
+--   case sMode is
+--     -- includes worst case propagation delay
+--     when "11" => 
+--     sqa <= a after 22 ns;
+--     sqb <= b after 22 ns;
+--     sqc <= c after 22 ns;
+--     sqd <= d after 22 ns;
+--     when "01" => 
+--     sqa <= sR after 22 ns;  
+--     sqb <= sqa after 22 ns; 
+--     sqc <= sqb after 22 ns; 
+--     sqd <= sqc after 22 ns;
+--     when "10" => 
+--     sqa <= sqb after 22 ns;
+--     sqb <= sqc after 22 ns;
+--     sqc <= sqd after 22 ns;
+--     sqd <= sL after 22 ns; 
+--     when others => 
+--     sqa <= sqa after 22 ns;
+--     sqb <= sqb after 22 ns;
+--     sqc <= sqc after 22 ns;
+--     sqd <= sqd after 22 ns; 
+--   end case;
+--   end if;
+-- end process;
+-- qa <= sqa;
+-- qb <= sqb;
+-- qc <= sqc;
+-- qd <= sqd;
+-- end architecture behv;

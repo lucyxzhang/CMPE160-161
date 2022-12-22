@@ -1,0 +1,51 @@
+-- Project name	: lab12
+-- File		: complete_serial_adder.vhd
+-- Author	: Lucy Zhang
+-- Entity	: complete_serial_adder
+-- Architecture	: struct
+-- Description: serial adder with state machine/control unit
+--------------------------------------------------------------
+library ieee;
+use ieee.std_logic_1164.all;
+
+-- entity and ports initialization
+entity complete_serial_adder is
+  port (clk   	: in std_logic; -- input
+        start   : in std_logic; -- input
+        clear_sm: in std_logic; -- input
+        inA, inB: in  std_logic_vector(3 downto 0); -- input (4 bit)
+        ready   : out std_logic; --output
+        cout    : out std_logic; --output
+        sum     : out std_logic_vector(3 downto 0)); -- output (4 bit)
+end entity;
+ 
+-- architecture of serial adder with state machine
+architecture struct of complete_serial_adder is
+    component serial_adder is -- component
+        port (
+              in_a    : in std_logic_vector(3 downto 0); -- in logic (4 bits)
+              in_b    : in std_logic_vector(3 downto 0); -- in logic (4 bits)
+              control : in std_logic_vector(1 downto 0); -- in logic (2 bits)
+              clk     : in std_logic;                    -- in logic
+              clear_dp: in std_logic;                    -- in logic
+              sum     : out std_logic_vector(3 downto 0);-- out logic (4 bits)
+              carry   : out std_logic);                    -- out logic
+    end component;
+
+    component control_unit is
+        port (
+            start : in std_logic;   -- in logic
+            clk : in std_logic;     -- in logic
+            clear_sm : in std_logic;-- in logic
+            control_output : out std_logic_vector(3 downto 0)); -- out logic (4 bits)
+    end component;
+  
+  -- internal signals
+  signal s_ctrl_out : std_logic_vector(3 downto 0);
+  begin
+  
+  --build port map and instances
+    control_unit1 : control_unit port map(start => start, clk => clk, clear_sm => clear_sm, control_output => s_ctrl_out);
+    serial_adder1: serial_adder port map(in_a => inA, in_b => inB, control => s_ctrl_out(1 downto 0), clk => clk, clear_dp => s_ctrl_out(2), sum => sum, carry => cout);
+    ready <= s_ctrl_out(3);
+end architecture; 

@@ -1,0 +1,23 @@
+-- Project name	: lab12
+-- File		: full_adder_1_bit.vhd
+-- Author	: Lucy Zhang
+-- Entity	: full_adder_1_bit
+-- Architecture	: df
+-- Description: 1 bit full adder
+--------------------------------------------------------------
+
+library ieee;
+use ieee.std_logic_1164.all;
+
+--entity 
+entity full_adder_1_bit is 
+  port (A, B, Cin     : in std_logic;
+        Sum, Cout     : out std_logic);
+end entity;
+
+-- architecture 8 ns delay
+architecture df of full_adder_1_bit is
+  begin
+    Sum <= A XOR B XOR Cin after 8 ns;
+    Cout <= (A AND B) OR (A AND Cin) OR (B AND Cin) after 8 ns;
+end architecture;

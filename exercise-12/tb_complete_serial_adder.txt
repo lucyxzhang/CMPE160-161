@@ -1,0 +1,130 @@
+-- Project name	: lab12
+-- File		: tb_complete_serial_adder.vhd
+-- Author	: Lucy Zhang
+-- Entity	: tb_complete_serial_adder
+-- Architecture	: behav
+-- Description: testbench for serial adder with state machine
+--------------------------------------------------------------
+library ieee;
+use ieee.std_logic_1164.all;
+
+--entity
+entity tb_complete_serial_adder is
+end tb_complete_serial_adder;
+
+-- architecture
+architecture behav of tb_complete_serial_adder is
+
+-- makes the testRecord array 
+    type ttestRecord is record
+        in_a, in_b : std_logic_vector(3 downto 0);
+        sum : std_logic_vector(3 downto 0);
+        carry : std_logic;
+    end record;
+
+    type ttestRecordArray is array (natural range <>) of ttestRecord;
+ 
+ -- the simulated input signals in testbench
+    constant ctest : ttestRecordArray := (
+     -- in_a, in_b, sum, carry
+        (X"0", X"4", X"4", '0'),
+        (X"C", X"E", X"A", '1'),
+        (X"8", X"A", X"2", '1'),
+        (X"F", X"F", X"E", '1'),
+        (X"F", X"1", X"0", '1'),
+        (X"A", X"5", X"2", '0'),
+        (X"8", X"7", X"F", '0'));
+        
+    -- component
+    component complete_serial_adder is
+        port (clk   	: in std_logic;
+            start   : in std_logic;
+            clear_sm: in std_logic;
+            inA, inB: in  std_logic_vector(3 downto 0);
+            ready   : out std_logic;
+            cout    : out std_logic;
+            sum     : out std_logic_vector(3 downto 0)
+            );
+    end component;
+
+    -- function that converts vectors to strings for easier printing
+    function vector2string(vec : std_logic_vector) return string is
+        variable stmp : string(vec'high + 1 downto 1);
+        variable counter : integer := 1;
+    begin
+        for i in vec'reverse_range loop
+            stmp(counter) := std_logic'image(vec(i))(2); -- image returns '1' (with quotes)
+            counter := counter + 1;
+        end loop;
+        return stmp;
+    end vector2string;
+    
+    -- constant for clock period
+    constant clk_period : time := 100 ns;
+    -- Inputs
+    signal s_clk : std_logic := '0';
+    signal s_start : std_logic := '0';
+    signal s_clear_sm : std_logic := '0';
+    signal s_inA : std_logic_vector(3 downto 0) := (others => '0');
+    signal s_inB : std_logic_vector(3 downto 0) := (others => '0');
+    -- Outputs
+    signal s_ready: std_logic;
+    signal s_cout : std_logic := '0';
+    signal s_sum : std_logic_vector(3 downto 0);
+
+begin
+-- unit under testing and port map
+    UUT : complete_serial_adder port map(
+        clk => s_clk,
+        start => s_start,
+        clear_sm => s_clear_sm,
+        inA => s_inA,
+        inB => s_inB,
+        ready => s_ready,
+        cout => s_cout,
+        sum => s_sum);
+
+-- handles the clock function
+    clk_process : process
+    begin
+        s_clk <= '0';
+        wait for clk_period/2;
+        s_clk <= '1';
+        wait for clk_period/2;
+    end process clk_process;
+
+
+-- handles the testing from the test array and assert statements
+-- that print when errors occur
+    stim_process : process
+        --variable vtest : ttestRecord;
+    begin
+        
+        for i in ctest'range loop
+        -- initially starts at 0 to clear everything;
+            s_start <= '0';
+            s_clear_sm <= '0';
+            wait for clk_period/4;
+            s_start <= '1';
+            s_clear_sm <= '1';
+            
+            --vtest := ctest(i); -- update record index for assert comparisons
+            s_inA <= ctest(i).in_a; -- update the shift register's inputs
+            s_inB <= ctest(i).in_b;
+            
+            wait until s_ready = '1';
+
+            -- prints when errors occur
+            assert ((s_sum = ctest(i).sum) and (s_cout = ctest(i).carry))-- reports if the output is not what is expected
+            report "serial adder failed at: " & time'image(now) & -- reports time of error (ns)
+                ". Expected: " & vector2string(ctest(i).carry & ctest(i).sum) & --expected output
+                ". Got: " & vector2string(s_cout & s_sum) -- the output that it got
+                severity error; -- severity is error (warning)
+        end loop;
+        --wait; -- waits for forever; makes it so the process only runs once
+        -- prints and stops simulation eveytime
+        assert false
+            report "JK the simulation finished"
+            severity failure;
+    end process stim_process;
+end architecture;

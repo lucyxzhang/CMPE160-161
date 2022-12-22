@@ -1,0 +1,21 @@
+-- Project name	: lab12
+-- File		: and2.vhd
+-- Author	: Lucy Zhang
+-- Entity	: and2
+-- Architecture	: df
+-- Description: 2 input and gate
+--------------------------------------------------------------
+library ieee;
+use ieee.std_logic_1164.all;
+
+-- entity
+entity and2 is 
+  port (A, B  : in std_logic;
+        Y     : out std_logic);
+end entity;
+
+-- 4 ns delay
+architecture df of and2 is
+  begin
+    Y <= A AND B after 4 ns;
+end architecture;

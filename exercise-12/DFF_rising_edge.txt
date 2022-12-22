@@ -1,0 +1,28 @@
+-- Project name	: lab12
+-- File		: DFF_rising_edge.vhd
+-- Author	: Lucy Zhang
+-- Entity	: DFF_rising_edge
+-- Architecture	: behv
+-- Description: D Flip Flip rising edge trigger
+--------------------------------------------------------------
+library ieee;
+use ieee.std_logic_1164.all;
+
+--entity
+entity DFF_rising_edge is
+  port (D, CLK, CLR, EN  : in std_logic;
+        Q       : out std_logic);
+end entity;
+
+-- architecture 6 ns delay
+architecture bhv of DFF_rising_edge is
+  begin
+    process(CLK, CLR, EN)
+      begin
+        if (CLR = '0') then
+          Q <= '0' after 6 ns;
+        elsif (rising_edge(CLK) and EN = '1') then
+          Q <= D after 6 ns;
+      end if;
+    end process;
+end architecture;

@@ -1,0 +1,75 @@
+-- Project name	: lab12
+-- File		: serial_adder.vhd
+-- Author	: Lucy Zhang
+-- Entity	: serial_adder
+-- Architecture	: struct
+-- Description: serial adder
+--------------------------------------------------------------
+library ieee;
+use ieee.std_logic_1164.all;
+
+-- declare entity
+entity serial_adder is
+  port (in_a    : in std_logic_vector(3 downto 0); 
+       	in_b    : in std_logic_vector(3 downto 0);
+        control : in std_logic_vector(1 downto 0);
+        clk   	: in std_logic;
+        clear_dp: in std_logic;
+        sum     : out std_logic_vector(3 downto 0);
+        carry   : out std_logic
+        );
+end entity;
+
+-- architecture
+architecture struct of serial_adder is
+-- declare all components
+  component DM74LS194A is
+    port (a, b, c, d : in std_logic;     -- in logic
+          clk, clear : in std_logic;     -- in logic
+          s0, s1     : in std_logic;     -- in logic
+          sL, sR     : in std_logic;     -- in logic
+          qa, qb, qc, qd : out std_logic -- out logic
+          );
+  end component;
+  
+  component DFF_rising_edge is 
+    port (D, CLK, CLR, EN  : in std_logic;
+          Q       	   	    : out std_logic
+          );
+    end component;
+    
+  component full_adder_1_bit is
+    port (A, B, Cin     : in std_logic;
+          Sum, Cout     : out std_logic
+          ); 
+    end component;
+    
+  component inverter is
+		port (
+			A : in std_logic;
+			Y : out std_logic
+		);
+  end component inverter;
+
+  component and2 is
+		port (
+			A, B: in std_logic;
+			Y   : out std_logic
+		);
+	end component and2;
+
+  -- internal signals (refer to diagram to see which internal wires better)
+  signal s_1, s_2, s_3, s_4, s_5, not_c, s_en : std_logic := '0';
+  signal s_6, s_7 : std_logic_vector(2 downto 0);
+  begin
+  
+  --build port map and instances
+    regA : DM74LS194A port map(a => in_a(3), b => in_a(2), c => in_a(1), d => in_a(0), clk => clk, clear => clear_dp, s0 => control(0), s1  => control(1), sL => '0', sR => s_3, qa => s_6(2), qb => s_6(1), qc => s_6(0), qd => s_5);
+    regB : DM74LS194A port map(a => in_b(3), b => in_b(2), c => in_b(1), d => in_b(0), clk => clk, clear => clear_dp, s0 => control(0), s1  => control(1), sL => '0', sR => '0', qa => s_7(2) , qb => s_7(1), qc => s_7(0), qd => s_4);
+    DFF  : DFF_rising_edge port map(D => s_1, CLK => clk, CLR => clear_dp, EN => s_en, Q => s_2);
+    adder: full_adder_1_bit port map(A => s_5, B => s_4, Cin => s_2, Sum => s_3, Cout => s_1);
+    and1 : and2 port map(A => control(0), B => not_c, Y => s_en); 
+    inv1 : inverter port map(A => control(1), Y => not_c);
+    sum <= s_6 & s_5;
+    carry <= s_2;
+end architecture; 
